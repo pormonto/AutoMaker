@@ -103,18 +103,22 @@ def object_coords(group, i):
     return xi, yi
 
 def find_object(obj):
-    list_index = 0
+    group_index = 0
     for category in objects:
         for group in objects[category]:
             try:
                 index = group.index(obj)
-                x, y = object_coords(group, index)
-                return x, y, list_index
+                return index, group_index
             except ValueError:
                 pass
-            list_index += 1
+            group_index += 1
 
     raise ValueError(f"Object '{obj}' not in 'objects'")
+
+objects_state = {
+    "current_group": 0,
+    "indices": [0] * 11
+}
 
 # TODO factor into a module maybe
 class AutomationManager(ABC):
@@ -192,25 +196,39 @@ class MacOSAutomationManager(AutomationManager):
         prev_section = (270, 120)
 
         try:
-            x, y, list_index = find_object(obj)
+            item_index, group_index = find_object(obj)
         except ValueError as e:
             print(f"Error: {e}", file=sys.stderr)
             return
 
         self.click(*search_btn)
 
-        # reset to the beginning of the list
-        for i in range(3):
-            self.click(*prev_section)
-        self.click(*prev_btn)
+        current_group_index = objects_state["current_group"]
+        group_delta = group_index - current_group_index
+        if group_delta > 0:
+            for i in range(group_delta):
+                self.keystroke(self.keys.R)
+        elif group_delta < 0:
+            for i in range(-group_delta):
+                self.keystroke(self.keys.L)
 
-        for i in range(list_index):
-            self.click(*next_btn)
+        current_item_index = objects_state["indices"][group_index]
+        item_delta = item_index - current_item_index
+        if item_delta > 0:
+            for i in range(item_delta):
+                self.keystroke(self.keys.D_RIGHT)
+        elif item_delta < 0:
+            for i in range(-item_delta):
+                self.keystroke(self.keys.D_LEFT)
 
-        self.click(x, y)
+        self.keystroke(self.keys.A_BTN)
+
+        objects_state["current_group"] = group_index
+        objects_state["indices"][group_index] = item_index
 
     def place_object(self, obj, x, y):
         self.select_object(obj)
+        time.sleep(0.5)
 
         # TODO flesh out grid management
         self.erase(x, y)
