@@ -80,32 +80,124 @@ class Object:
         return f"Object({self.name}, {self.category}, list={self.list_index}, index={self.index})"
 
 class ObjectManager:
-    def __init__(self):
+    def __init__(self, style):
         self.objects_by_name = {}
+        self.style = style
         self.current_list = 0
         self.list_indices = [0] * 11
 
-        self.categories = {
-            "Terrain": [
-                ["Ground", "Steep Slope", "Gentle Slope", "Pipe", "Spike Trap", "Mushroom Platform", "Semisolid Platform", "Bridge"],
-                ["Block", "? Block", "Hard Block", "Hidden Block", "Donut Block", "Note Block", "Cloud Block", "Ice Block"]
-            ],
-            "Items": [
-                ["Coin", "10-Coin", "Pink Coin", "Super Mushroom", "Fire Flower", "Cape Feather", "Super Star", "1-Up Mushroom", "Yoshi's Egg"]
-            ],
-            "Enemies": [
-                ["Galoomba", "Koopa Troopa", "Buzzy Beetle", "Spike Top", "Spiny", "Blooper", "Cheep Cheep"],
-                ["Jumping Pirahna Plant", "Muncher", "Thwomp", "Monty Mole", "Rocky Wrench", "Hammer Bro", "Chain Comp"],
-                ["Wiggler", "Boo", "Lava Bubble", "Bob-omp", "Dry Bones", "Fish Bone", "Magikoopa"],
-                ["Bowser", "Bowser Jr.", "Boom Boom", "Angry Sun", "Lakitu", "Koopa Clown Car"]
-            ],
-            "Gizmos": [
-                ["Burner", "Bill Blaster", "Banzai Bill", "Cannon", "Icicle", "Twister"],
-                ["Key", "Warp Door", "P Switch", "POW Block", "Trampoline", "Vine", "Arrow Sign", "Checkpoint Flag"],
-                ["Lift", "Lava Lift", "Seesaw", "Grinder", "Bumper", "Skewer", "Swinging Claw"],
-                ["ON/OFF Switch", "Dotted-Line Block", "Snake Block", "Fire Bar", "One-Way Wall", "Conveyor Belt", "Track"]
-            ]
+        self.styles = {
+            "Super Mario Bros": {
+                "Terrain": [
+                    ["Ground", "Steep Slope", "Gentle Slope", "Pipe", "Spike Trap", "Mushroom Platform", "Semisolid Platform", "Bridge"],
+                    ["Block", "? Block", "Hard Block", "Hidden Block", "Donut Block", "Note Block", "Cloud Block", "Ice Block"]
+                ],
+                "Items": [
+                    ["Coin", "10-Coin", "Pink Coin", "Super Mushroom", "Big Mushroom", "Cape Feather", "Super Star", "1-Up Mushroom", "Shoe Goomba"]
+                ],
+                "Enemies": [
+                    ["Goomba", "Koopa Troopa", "Buzzy Beetle", "Spike Top", "Spiny", "Blooper", "Cheep Cheep"],
+                    ["Pirahna Plant", "Muncher", "Thwomp", "Monty Mole", "Rocky Wrench", "Hammer Bro", "Chain Comp"],
+                    ["Wiggler", "Boo", "Lava Bubble", "Bob-omp", "Dry Bones", "Fish Bone", "Magikoopa"],
+                    ["Bowser", "Bowser Jr.", "Boom Boom", "Angry Sun", "Lakitu", "Koopa Clown Car"]
+                ],
+                "Gizmos": [
+                    ["Burner", "Bill Blaster", "Banzai Bill", "Cannon", "Icicle", "Twister"],
+                    ["Key", "Warp Door", "P Switch", "POW Block", "Trampoline", "Vine", "Arrow Sign", "Checkpoint Flag"],
+                    ["Lift", "Lava Lift", "Seesaw", "Grinder", "Bumper", "Skewer", "Swinging Claw"],
+                    ["ON/OFF Switch", "Dotted-Line Block", "Snake Block", "Fire Bar", "One-Way Wall", "Conveyor Belt", "Track"]
+                ]
+            },
+
+            "Super Mario Bros 3": {
+                "Terrain": [
+                    ["Ground", "Steep Slope", "Gentle Slope", "Pipe", "Spike Trap", "Mushroom Platform", "Semisolid Platform", "Bridge"],
+                    ["Block", "? Block", "Hard Block", "Hidden Block", "Donut Block", "Note Block", "Cloud Block", "Ice Block"]
+                ],
+                "Items": [
+                    ["Coin", "10-Coin", "Pink Coin", "Super Mushroom", "Fire Flower", "Super Leaf", "Super Star", "1-Up Mushroom", "Shoe Goomba"]
+                ],
+                "Enemies": [
+                    ["Goomba", "Koopa Troopa", "Buzzy Beetle", "Spike Top", "Spiny", "Blooper", "Cheep Cheep"],
+                    ["Pirahna Plant", "Muncher", "Thwomp", "Monty Mole", "Rocky Wrench", "Hammer Bro", "Chain Comp"],
+                    ["Wiggler", "Boo", "Lava Bubble", "Bob-omp", "Dry Bones", "Fish Bone", "Magikoopa"],
+                    ["Bowser", "Bowser Jr.", "Boom Boom", "Angry Sun", "Lakitu", "Koopa Clown Car"]
+                ],
+                "Gizmos": [
+                    ["Burner", "Bill Blaster", "Banzai Bill", "Cannon", "Icicle", "Twister"],
+                    ["Key", "Warp Door", "P Switch", "POW Block", "Trampoline", "Vine", "Arrow Sign", "Checkpoint Flag"],
+                    ["Lift", "Lava Lift", "Seesaw", "Grinder", "Bumper", "Skewer", "Swinging Claw"],
+                    ["ON/OFF Switch", "Dotted-Line Block", "Snake Block", "Fire Bar", "One-Way Wall", "Conveyor Belt", "Track"]
+                ]
+            },
+
+            "Super Mario World": {
+                "Terrain": [
+                    ["Ground", "Steep Slope", "Gentle Slope", "Pipe", "Spike Trap", "Mushroom Platform", "Semisolid Platform", "Bridge"],
+                    ["Block", "? Block", "Hard Block", "Hidden Block", "Donut Block", "Note Block", "Cloud Block", "Ice Block"]
+                ],
+                "Items": [
+                    ["Coin", "10-Coin", "Pink Coin", "Super Mushroom", "Fire Flower", "Cape Feather", "Super Star", "1-Up Mushroom", "Yoshi's Egg"]
+                ],
+                "Enemies": [
+                    ["Galoomba", "Koopa Troopa", "Buzzy Beetle", "Spike Top", "Spiny", "Blooper", "Cheep Cheep"],
+                    ["Jumping Pirahna Plant", "Muncher", "Thwomp", "Monty Mole", "Rocky Wrench", "Hammer Bro", "Chain Comp"],
+                    ["Wiggler", "Boo", "Lava Bubble", "Bob-omp", "Dry Bones", "Fish Bone", "Magikoopa"],
+                    ["Bowser", "Bowser Jr.", "Boom Boom", "Angry Sun", "Lakitu", "Koopa Clown Car"]
+                ],
+                "Gizmos": [
+                    ["Burner", "Bill Blaster", "Banzai Bill", "Cannon", "Icicle", "Twister"],
+                    ["Key", "Warp Door", "P Switch", "POW Block", "Trampoline", "Vine", "Arrow Sign", "Checkpoint Flag"],
+                    ["Lift", "Lava Lift", "Seesaw", "Grinder", "Bumper", "Skewer", "Swinging Claw"],
+                    ["ON/OFF Switch", "Dotted-Line Block", "Snake Block", "Fire Bar", "One-Way Wall", "Conveyor Belt", "Track"]
+                ]
+            },
+
+            "Super Mario Bros U": {
+                "Terrain": [
+                    ["Ground", "Steep Slope", "Gentle Slope", "Pipe", "Spike Trap", "Mushroom Platform", "Semisolid Platform", "Bridge"],
+                    ["Block", "? Block", "Hard Block", "Hidden Block", "Donut Block", "Note Block", "Cloud Block", "Ice Block"]
+                ],
+                "Items": [
+                    ["Coin", "10-Coin", "Pink Coin", "Super Mushroom", "Fire Flower", "Propeller Mushroom", "Super Star", "1-Up Mushroom", "Yoshi's Egg"]
+                ],
+                "Enemies": [
+                    ["Goomba", "Koopa Troopa", "Buzzy Beetle", "Spike Top", "Spiny", "Blooper", "Cheep Cheep"],
+                    ["Pirahna Plant", "Muncher", "Thwomp", "Monty Mole", "Rocky Wrench", "Hammer Bro", "Chain Comp"],
+                    ["Wiggler", "Boo", "Lava Bubble", "Bob-omp", "Dry Bones", "Fish Bone", "Magikoopa"],
+                    ["Bowser", "Bowser Jr.", "Boom Boom", "Angry Sun", "Lakitu", "Junior Clown Car"]
+                ],
+                "Gizmos": [
+                    ["Burner", "Bill Blaster", "Banzai Bill", "Cannon", "Icicle", "Twister"],
+                    ["Key", "Warp Door", "P Switch", "POW Block", "Trampoline", "Vine", "Arrow Sign", "Checkpoint Flag"],
+                    ["Lift", "Lava Lift", "Seesaw", "Grinder", "Bumper", "Skewer", "Swinging Claw"],
+                    ["ON/OFF Switch", "Dotted-Line Block", "Snake Block", "Fire Bar", "One-Way Wall", "Conveyor Belt", "Track"]
+                ]
+            },
+
+            "Super Mario 3D Worlds": {
+                "Terrain": [
+                    ["Ground", "Steep Slope", "Gentle Slope", "Pipe", "Clear Pipe", "Spike Block", "Semisolid Platform"],
+                    ["Block", "? Block", "Hard Block", "Hidden Block", "Donut Block", "Note Block", "Cloud Block", "Ice Block"]
+                ],
+                "Items": [
+                    ["Coin", "10-Coin", "Pink Coin", "Super Mushroom", "Super Bell", "Fire Flower", "Super Star", "1-Up Mushroom"]
+                ],
+                "Enemies": [
+                    ["Goomba", "Koopa Troopa", "Ant Trooper", "Spiny", "Spiny", "Blooper", "Cheep Cheep"],
+                    ["Skipsqueak", "Stingby", "Piranha Plant", "Pirahna Creeper", "Thwomp", "Hammer Bro", "Hop-Chops"],
+                    ["Boo", "Lava Bubble", "Bob-omp", "Dry Bones", "Fish Bone", "Magikoopa"],
+                    ["Meowser", "Boom Boom", "Charvaargh", "Bully", "Porcupuffer", "Koopa Troopa Car"]
+                ],
+                "Gizmos": [
+                    ["Bill Blaster", "Banzai Bill", "Icicle", "Twister", "ON/OFF Switch", "Conveyor Belt", "Crate"],
+                    ["Key", "Warp Door", "Warp Box", "P Switch", "POW Block", "Trampoline", "Arrow Sign", "Checkpoint Flag"],
+                    ["Cloud Lift", "! Block", "Snake Block", "Blinking Block", "Track Block", "Tree", "Mushroom Trampoline"]
+                ]
+            }
         }
+
+        self.categories = self.styles[self.style]
 
         list_index = 0
         for category, lists in self.categories.items():
@@ -158,14 +250,14 @@ class AutomationManager(ABC):
     # source: /Library/Developer/CommandLineTools/SDKs/MacOSX14.5.sdk/System/Library/Frameworks/
     # Carbon.framework/Versions/A/Frameworks/HIToolbox.framework/Versions/A/Headers/Events.h
 
-    def __init__(self, x, y, width, height, dvorak=False):
+    def __init__(self, x, y, width, height, style, dvorak=False):
         self.win_x = x
         self.win_y = y
         self.win_width = width
         self.win_height = height
 
         self.keys = DvorakKeys if dvorak else Keys
-        self.object_manager = ObjectManager()
+        self.object_manager = ObjectManager(style)
         self.current_object = ""
 
         self._activate()
@@ -259,9 +351,9 @@ class MacOSAutomationManager(AutomationManager):
         self.erase(x, y)
         self.click(x, y)
 
-def get_automation_manager(x, y, width, height, dvorak=False):
+def get_automation_manager(x, y, width, height, style, dvorak=False):
     if sys.platform == "darwin":
-        return MacOSAutomationManager(x, y, width, height, dvorak=dvorak)
+        return MacOSAutomationManager(x, y, width, height, style, dvorak=dvorak)
     else:
         raise NotImplementedError(f"Unsupported platform '{sys.platform}'")
 
@@ -273,7 +365,7 @@ def parse_args():
 def main():
     args = parse_args()
 
-    am = get_automation_manager(100, 100, 915, 600, dvorak=args.dvorak)
+    am = get_automation_manager(100, 100, 915, 600, "Super Mario Bros", dvorak=args.dvorak)
 
     am.place_object("Koopa Troopa", 550, 250) # random square on grid
     time.sleep(2)
