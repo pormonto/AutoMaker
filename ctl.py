@@ -1,37 +1,65 @@
 import subprocess
+import sys
 import time
+from abc import ABC, abstractmethod
 
-def script(code):
-    subprocess.run(["osascript", "-e", code])
+class AutomationManager(ABC):
+    def __init__(self, x, y, width, height):
+        self.win_x = x
+        self.win_y = y
+        self.win_width = width
+        self.win_height = height
 
-def activate():
-    script('tell application "Ryujinx" to activate')
+        self._activate()
+        self._resize_and_move(x, y, width, height)
 
-def tell_ryujinx(*cmds):
-    code = '\n'.join(cmds)
-    script(f'tell application "System Events" to tell process "Ryujinx"\n{code}\nend tell')
+    @abstractmethod
+    def _activate(self):
+        pass
 
-def resize_and_move(x, y, w, h):
-    tell_ryujinx(
-        f"set position of window 1 to {{{x}, {y}}}",
-        f"set size of window 1 to {{{w}, {h}}}"
-    )
+    @abstractmethod
+    def _resize_and_move(self, x, y, w, h):
+        pass
 
-def click(x, y):
-    subprocess.run(["./click", str(x), str(y)])
+    @abstractmethod
+    def click(self, x, y):
+        pass
+
+class MacOSAutomationManager(AutomationManager):
+    def _script(self, code):
+        subprocess.run(["osascript", "-e", code])
+
+    def _activate(self):
+        self._script('tell application "Ryujinx" to activate')
+
+    def _tell_ryujinx(self, *cmds):
+        code = '\n'.join(cmds)
+        self._script(f'tell application "System Events" to tell process "Ryujinx"\n{code}\nend tell')
+
+    def _resize_and_move(self, x, y, width, height):
+        self._tell_ryujinx(
+            f"set position of window 1 to {{{x}, {y}}}",
+            f"set size of window 1 to {{{width}, {height}}}"
+        )
+        time.sleep(0.1)
+
+    def click(self, x, y):
+        subprocess.run(["./click", str(x + self.win_x), str(y + self.win_y)])
+
+def get_automation_manager(x, y, width, height):
+    if sys.platform == "darwin":
+        return MacOSAutomationManager(x, y, width, height)
+    else:
+        raise NotImplementedError(f"Unsupported platform '{sys.platform}'")
 
 def main():
-    x, y, w, h = 100, 100, 915, 600
+    am = get_automation_manager(100, 100, 915, 600)
 
-    resize_and_move(x, y, w, h)
-    activate()
-    time.sleep(0.2)
+    am.click(110, 110)
+    am.click(669, 435)
 
-    click(210, 210)
-    click(769, 535)
-
-    click(210, 210)
-    click(618, 461)
+    am.click(110, 110)
+    am.click(518, 361)
 
 if __name__ == "__main__":
     main()
