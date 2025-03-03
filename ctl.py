@@ -1,8 +1,11 @@
 import argparse
+import math
 import subprocess
 import sys
 import time
 from abc import ABC, abstractmethod
+
+# TODO refactor to use a Point or something instead of raw x/y pairs
 
 class Keys:
     ZL = 0x0C       # Q
@@ -66,6 +69,53 @@ class DvorakKeys:
     D_DOWN = 0x7D   # down arrow
     D_UP = 0x7E     # up arrow
 
+objects = {
+    "Terrain": [
+        ["Ground", "Steep Slope", "Gentle Slope", "Pipe", "Spike Trap", "Mushroom Platform", "Semisolid Platform", "Bridge"],
+        ["Block", "? Block", "Hard Block", "Hidden Block", "Donut Block", "Note Block", "Cloud Block", "Ice Block"]
+    ],
+    "Items": [
+        ["Coin", "10-Coin", "Pink Coin", "Super Mushroom", "Fire Flower", "Cape Feather", "Super Star", "1-Up Mushroom", "Yoshi's Egg"]
+    ],
+    "Enemies": [
+        ["Galoomba", "Koopa Troopa", "Buzzy Beetle", "Spike Top", "Spiny", "Blooper", "Cheep Cheep"],
+        ["Jumping Pirahna Plant", "Muncher", "Thwomp", "Monty Mole", "Rocky Wrench", "Hammer Bro", "Chain Comp"],
+        ["Wiggler", "Boo", "Lava Bubble", "Bob-omp", "Dry Bones", "Fish Bone", "Magikoopa"],
+        ["Bowser", "Bowser Jr.", "Boom Boom", "Angry Sun", "Lakitu", "Koopa Clown Car"]
+    ],
+    "Gizmos": [
+        ["Burner", "Bill Blaster", "Banzai Bill", "Cannon", "Icicle", "Twister"],
+        ["Key", "Warp Door", "P Switch", "POW Block", "Trampoline", "Vine", "Arrow Sign", "Checkpoint Flag"],
+        ["Lift", "Lava Lift", "Seesaw", "Grinder", "Bumper", "Skewer", "Swinging Claw"],
+        ["ON/OFF Switch", "Dotted-Line Block", "Snake Block", "Fire Bar", "One-Way Wall", "Conveyor Belt", "Track"]
+    ]
+}
+
+def object_coords(group, i):
+    cx = 457
+    cy = 367
+    r = cy - 250
+    n = len(group)
+
+    xi = int(cx + r * math.cos(2 * math.pi * i / n - math.pi / 2))
+    yi = int(cy + r * math.sin(2 * math.pi * i / n - math.pi / 2))
+
+    return xi, yi
+
+def find_object(obj):
+    list_index = 0
+    for category in objects:
+        for group in objects[category]:
+            try:
+                index = group.index(obj)
+                x, y = object_coords(group, index)
+                return x, y, list_index
+            except ValueError:
+                pass
+            list_index += 1
+
+    raise ValueError(f"Object '{obj}' not in 'objects'")
+
 # TODO factor into a module maybe
 class AutomationManager(ABC):
     # source: /Library/Developer/CommandLineTools/SDKs/MacOSX14.5.sdk/System/Library/Frameworks/
@@ -78,6 +128,8 @@ class AutomationManager(ABC):
         self.win_height = height
 
         self.keys = DvorakKeys if dvorak else Keys
+
+        self.current_object = ""
 
         self._activate()
         self._resize_and_move(x, y, width, height)
@@ -122,23 +174,47 @@ class MacOSAutomationManager(AutomationManager):
 
     def click(self, x, y):
         subprocess.run(["./sim", "click", str(x + self.win_x), str(y + self.win_y)])
-        time.sleep(0.4) # minimum time that seems to work
+        time.sleep(0.4) # minimum time that seems to work. Might need to be raised.
 
     def keystroke(self, key):
         subprocess.run(["./sim", "keystroke", str(key)])
         # time.sleep(0.1)
 
-    # TODO define a map of objects' positions
-    def select_object(self, object):
+    def erase(self, x, y):
+        self.keystroke(self.keys.L)
+        self.click(x, y)
+        self.keystroke(self.keys.L)
+
+    def select_object(self, obj):
         search_btn = (880, 110)
         next_btn = (760, 360)
         prev_btn = (160, 360)
+        prev_section = (270, 120)
+
+        try:
+            x, y, list_index = find_object(obj)
+        except ValueError as e:
+            print(f"Error: {e}", file=sys.stderr)
+            return
 
         self.click(*search_btn)
-        self.click(*next_btn)
-        self.click(540, 440) # random item
 
-        self.click(550, 250) # random square on grid
+        # reset to the beginning of the list
+        for i in range(3):
+            self.click(*prev_section)
+        self.click(*prev_btn)
+
+        for i in range(list_index):
+            self.click(*next_btn)
+
+        self.click(x, y)
+
+    def place_object(self, obj, x, y):
+        self.select_object(obj)
+
+        # TODO flesh out grid management
+        self.erase(x, y)
+        self.click(x, y)
 
 def get_automation_manager(x, y, width, height, dvorak=False):
     if sys.platform == "darwin":
@@ -156,7 +232,9 @@ def main():
 
     am = get_automation_manager(100, 100, 915, 600, dvorak=args.dvorak)
 
-    am.select_object("foo")
+    am.place_object("Koopa Troopa", 550, 250) # random square on grid
+    time.sleep(2)
+    am.place_object("Bowser Jr.", 550, 250)
 
 if __name__ == "__main__":
     main()
