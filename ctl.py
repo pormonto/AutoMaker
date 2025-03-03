@@ -69,56 +69,89 @@ class DvorakKeys:
     D_DOWN = 0x7D   # down arrow
     D_UP = 0x7E     # up arrow
 
-objects = {
-    "Terrain": [
-        ["Ground", "Steep Slope", "Gentle Slope", "Pipe", "Spike Trap", "Mushroom Platform", "Semisolid Platform", "Bridge"],
-        ["Block", "? Block", "Hard Block", "Hidden Block", "Donut Block", "Note Block", "Cloud Block", "Ice Block"]
-    ],
-    "Items": [
-        ["Coin", "10-Coin", "Pink Coin", "Super Mushroom", "Fire Flower", "Cape Feather", "Super Star", "1-Up Mushroom", "Yoshi's Egg"]
-    ],
-    "Enemies": [
-        ["Galoomba", "Koopa Troopa", "Buzzy Beetle", "Spike Top", "Spiny", "Blooper", "Cheep Cheep"],
-        ["Jumping Pirahna Plant", "Muncher", "Thwomp", "Monty Mole", "Rocky Wrench", "Hammer Bro", "Chain Comp"],
-        ["Wiggler", "Boo", "Lava Bubble", "Bob-omp", "Dry Bones", "Fish Bone", "Magikoopa"],
-        ["Bowser", "Bowser Jr.", "Boom Boom", "Angry Sun", "Lakitu", "Koopa Clown Car"]
-    ],
-    "Gizmos": [
-        ["Burner", "Bill Blaster", "Banzai Bill", "Cannon", "Icicle", "Twister"],
-        ["Key", "Warp Door", "P Switch", "POW Block", "Trampoline", "Vine", "Arrow Sign", "Checkpoint Flag"],
-        ["Lift", "Lava Lift", "Seesaw", "Grinder", "Bumper", "Skewer", "Swinging Claw"],
-        ["ON/OFF Switch", "Dotted-Line Block", "Snake Block", "Fire Bar", "One-Way Wall", "Conveyor Belt", "Track"]
-    ]
-}
+class Object:
+    def __init__(self, name, category, list_index, index):
+        self.name = name
+        self.category = category
+        self.list_index = list_index
+        self.index = index
 
-def object_coords(group, i):
-    cx = 457
-    cy = 367
-    r = cy - 250
-    n = len(group)
+    def __repr__(self):
+        return f"Object({self.name}, {self.category}, list={self.list_index}, index={self.index})"
 
-    xi = int(cx + r * math.cos(2 * math.pi * i / n - math.pi / 2))
-    yi = int(cy + r * math.sin(2 * math.pi * i / n - math.pi / 2))
+class ObjectManager:
+    def __init__(self):
+        self.objects_by_name = {}
+        self.current_list = 0
+        self.list_indices = [0] * 11
 
-    return xi, yi
+        self.categories = {
+            "Terrain": [
+                ["Ground", "Steep Slope", "Gentle Slope", "Pipe", "Spike Trap", "Mushroom Platform", "Semisolid Platform", "Bridge"],
+                ["Block", "? Block", "Hard Block", "Hidden Block", "Donut Block", "Note Block", "Cloud Block", "Ice Block"]
+            ],
+            "Items": [
+                ["Coin", "10-Coin", "Pink Coin", "Super Mushroom", "Fire Flower", "Cape Feather", "Super Star", "1-Up Mushroom", "Yoshi's Egg"]
+            ],
+            "Enemies": [
+                ["Galoomba", "Koopa Troopa", "Buzzy Beetle", "Spike Top", "Spiny", "Blooper", "Cheep Cheep"],
+                ["Jumping Pirahna Plant", "Muncher", "Thwomp", "Monty Mole", "Rocky Wrench", "Hammer Bro", "Chain Comp"],
+                ["Wiggler", "Boo", "Lava Bubble", "Bob-omp", "Dry Bones", "Fish Bone", "Magikoopa"],
+                ["Bowser", "Bowser Jr.", "Boom Boom", "Angry Sun", "Lakitu", "Koopa Clown Car"]
+            ],
+            "Gizmos": [
+                ["Burner", "Bill Blaster", "Banzai Bill", "Cannon", "Icicle", "Twister"],
+                ["Key", "Warp Door", "P Switch", "POW Block", "Trampoline", "Vine", "Arrow Sign", "Checkpoint Flag"],
+                ["Lift", "Lava Lift", "Seesaw", "Grinder", "Bumper", "Skewer", "Swinging Claw"],
+                ["ON/OFF Switch", "Dotted-Line Block", "Snake Block", "Fire Bar", "One-Way Wall", "Conveyor Belt", "Track"]
+            ]
+        }
 
-def find_object(obj):
-    group_index = 0
-    for category in objects:
-        for group in objects[category]:
-            try:
-                index = group.index(obj)
-                return index, group_index
-            except ValueError:
-                pass
-            group_index += 1
+        list_index = 0
+        for category, lists in self.categories.items():
+            for item_list in lists:
+                for index, name in enumerate(item_list):
+                    self.objects_by_name[name] = Object(name, category, list_index, index)
+                list_index += 1
 
-    raise ValueError(f"Object '{obj}' not in 'objects'")
+    def get_object(self, name):
+        if name not in self.objects_by_name:
+            raise ValueError(f"Object '{name}' not found")
+        return self.objects_by_name[name]
 
-objects_state = {
-    "current_group": 0,
-    "indices": [0] * 11
-}
+    def calculate_coordinates(self, list_index):
+        cx = 457
+        cy = 367
+        r = cy - 250
+
+        item_list = None
+        current_index = 0
+
+        for category in self.categories:
+            for l in self.categories[category]:
+                if current_index == list_index:
+                    item_list = l
+                    break
+                current_index += 1
+            if item_list:
+                break
+
+        if not item_list:
+            raise ValueError(f"List index {list_index} not found")
+
+        n = len(item_list)
+        coordinates = []
+
+        for i in range(n):
+            xi = int(cx + r * math.cos(2 * math.pi * i / n - math.pi / 2))
+            yi = int(cy + r * math.sin(2 * math.pi * i / n - math.pi / 2))
+            coordinates.append((xi, yi))
+
+        return coordinates
+
+    def update_selection(self, list_index, item_index):
+        self.current_list = list_index
+        self.list_indices[list_index] = item_index
 
 # TODO factor into a module maybe
 class AutomationManager(ABC):
@@ -132,7 +165,7 @@ class AutomationManager(ABC):
         self.win_height = height
 
         self.keys = DvorakKeys if dvorak else Keys
-
+        self.object_manager = ObjectManager()
         self.current_object = ""
 
         self._activate()
@@ -155,7 +188,11 @@ class AutomationManager(ABC):
         pass
 
     @abstractmethod
-    def select_object(self, object):
+    def select_object(self, object_name):
+        pass
+
+    @abstractmethod
+    def place_object(self, object_name, x, y):
         pass
 
 class MacOSAutomationManager(AutomationManager):
@@ -178,57 +215,45 @@ class MacOSAutomationManager(AutomationManager):
 
     def click(self, x, y):
         subprocess.run(["./sim", "click", str(x + self.win_x), str(y + self.win_y)])
-        time.sleep(0.4) # minimum time that seems to work. Might need to be raised.
 
     def keystroke(self, key):
         subprocess.run(["./sim", "keystroke", str(key)])
-        # time.sleep(0.1)
 
     def erase(self, x, y):
         self.keystroke(self.keys.L)
         self.click(x, y)
         self.keystroke(self.keys.L)
 
-    def select_object(self, obj):
-        search_btn = (880, 110)
-        next_btn = (760, 360)
-        prev_btn = (160, 360)
-        prev_section = (270, 120)
-
+    def select_object(self, object_name):
         try:
-            item_index, group_index = find_object(obj)
+            obj = self.object_manager.get_object(object_name)
         except ValueError as e:
             print(f"Error: {e}", file=sys.stderr)
             return
 
-        self.click(*search_btn)
+        self.keystroke(self.keys.D_UP)
+        self.keystroke(self.keys.Y_BTN)
+        time.sleep(0.5)
 
-        current_group_index = objects_state["current_group"]
-        group_delta = group_index - current_group_index
-        if group_delta > 0:
-            for i in range(group_delta):
-                self.keystroke(self.keys.R)
-        elif group_delta < 0:
-            for i in range(-group_delta):
-                self.keystroke(self.keys.L)
+        current_list = self.object_manager.current_list
+        delta = obj.list_index - current_list
+        key = self.keys.R if delta > 0 else self.keys.L
+        for i in range(abs(delta)):
+            self.keystroke(key)
 
-        current_item_index = objects_state["indices"][group_index]
-        item_delta = item_index - current_item_index
-        if item_delta > 0:
-            for i in range(item_delta):
-                self.keystroke(self.keys.D_RIGHT)
-        elif item_delta < 0:
-            for i in range(-item_delta):
-                self.keystroke(self.keys.D_LEFT)
+        current_item = self.object_manager.list_indices[obj.list_index]
+        delta = obj.index - current_item
+        key = self.keys.D_RIGHT if delta > 0 else self.keys.D_LEFT
+        for i in range(abs(delta)):
+            self.keystroke(key)
 
         self.keystroke(self.keys.A_BTN)
+        time.sleep(0.2)
 
-        objects_state["current_group"] = group_index
-        objects_state["indices"][group_index] = item_index
+        self.object_manager.update_selection(obj.list_index, obj.index)
 
-    def place_object(self, obj, x, y):
-        self.select_object(obj)
-        time.sleep(0.5)
+    def place_object(self, object_name, x, y):
+        self.select_object(object_name)
 
         # TODO flesh out grid management
         self.erase(x, y)
