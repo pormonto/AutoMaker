@@ -20,7 +20,7 @@ func click(at position: CGPoint, duration: UInt32 = 100_000) throws {
 
     mouseMove.post(tap: .cghidEventTap)
     mouseDown.post(tap: .cghidEventTap)
-    usleep(duration)
+    usleep(duration * 1000)
     mouseUp.post(tap: .cghidEventTap)
 }
 
@@ -35,7 +35,7 @@ func keystroke(code: CGKeyCode, duration: UInt32 = 100_000) throws {
     }
 
     keyDown.post(tap: .cghidEventTap)
-    usleep(duration)
+    usleep(duration * 1000)
     keyUp.post(tap: .cghidEventTap)
 }
 
@@ -52,7 +52,7 @@ func clickMain() {
         exit(1)
     }
 
-    var duration: UInt32 = 100_000
+    var duration: UInt32 = 100
     if arguments.count > 4 {
         guard let dur = UInt32(arguments[4]) else {
             print("Error: duration must be an integer")
@@ -82,7 +82,7 @@ func keystrokeMain() {
         exit(1)
     }
 
-    var duration: UInt32 = 100_000
+    var duration: UInt32 = 100
     if arguments.count > 3 {
         guard let dur = UInt32(arguments[3]) else {
             print("Error: duration must be an integer")

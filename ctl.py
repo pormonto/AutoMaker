@@ -240,27 +240,31 @@ class AutomationManager(ABC):
         self._activate()
         self._resize_and_move(x, y, width, height)
 
+    # Focus the emulator
     @abstractmethod
     def _activate(self):
         pass
 
+    # Resize the emulator to width w and height h, and move it to coords (x,y)
     @abstractmethod
     def _resize_and_move(self, x, y, w, h):
         pass
 
+    # Simulate a click at screen coordinates (x,y), for a given duration in milliseconds
     @abstractmethod
-    def _click(self, x, y, duration = 100_000):
+    def _click(self, x, y, duration = 100):
         pass
 
+    # Simulate a keypress for a given duration in milliseconds
     @abstractmethod
-    def _keystroke(self, key, duration = 100_000):
+    def _keystroke(self, key, duration = 100):
         pass
 
     def reset(self):
-        self._click(875, 530, 3_000_000)
+        self._click(875, 530, 3000)
         time.sleep(3)
 
-    def _click_point(self, point, duration = 100_000):
+    def _click_point(self, point, duration = 100):
         self._click(point.x, point.y, duration)
 
     def erase(self, x, y):
@@ -333,7 +337,7 @@ class AutomationManager(ABC):
         self._keystroke(Keys.A_BTN)
         time.sleep(0.3)
         self._click(500, 500)
-        self._click(550, 520, 4_000_000) # make track shorter
+        self._click(550, 520, 4_000) # make track shorter
         self._click(500, 500) # restore focus
 
         # for i in range(20):
@@ -358,10 +362,10 @@ class MacOSAutomationManager(AutomationManager):
         )
         time.sleep(0.1)
 
-    def _click(self, x, y, duration = 100_000):
+    def _click(self, x, y, duration = 100):
         subprocess.run(["./sim", "click", str(x + self.win_x), str(y + self.win_y), str(duration)])
 
-    def _keystroke(self, key, duration = 100_000):
+    def _keystroke(self, key, duration = 100):
         subprocess.run(["./sim", "keystroke", str(key), str(duration)])
 
 def get_automation_manager(x, y, width, height, style, dvorak=False):
