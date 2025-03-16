@@ -5,8 +5,6 @@ import time
 import json
 from abc import ABC, abstractmethod
 
-# TODO refactor to use a Point or something instead of raw x/y pairs
-
 # source: /Library/Developer/CommandLineTools/SDKs/MacOSX14.5.sdk/System/Library/Frameworks/
 # Carbon.framework/Versions/A/Frameworks/HIToolbox.framework/Versions/A/Headers/Events.h
 
@@ -267,22 +265,12 @@ class AutomationManager(ABC):
     def _click_point(self, point, duration = 100):
         self._click(point.x, point.y, duration)
 
-    def erase(self, x, y):
-        self._keystroke(Keys.L)
-        self._keystroke(Keys.X_BTN)
-        self._click(x, y)
-        self._keystroke(Keys.L)
-        self._keystroke(Keys.X_BTN)
-
-    def erase_point(self, point):
-        self.erase(point.x, point.y)
-
     def obstructed_by_menu(self, grid_point):
         return grid_point.x < 5 or grid_point.x > 22 or grid_point.y < 4
 
     def select_object(self, object_name):
         if object_name == self.last_inserted_object:
-            return  # Skip re-selection if same object
+            return
 
         try:
             obj = self.object_manager.get_object(object_name)
