@@ -4,7 +4,7 @@ enum EventError: Error {
     case createFailed
 }
 
-func click(at position: CGPoint) throws {
+func click(at position: CGPoint, duration: UInt32 = 100_000) throws {
     let source = CGEventSource(stateID: .hidSystemState)
 
     let mouseMove = CGEvent(mouseEventSource: source, mouseType: .mouseMoved,
@@ -20,11 +20,11 @@ func click(at position: CGPoint) throws {
 
     mouseMove.post(tap: .cghidEventTap)
     mouseDown.post(tap: .cghidEventTap)
-    usleep(100_000) // 100ms
+    usleep(duration)
     mouseUp.post(tap: .cghidEventTap)
 }
 
-func keystroke(code: CGKeyCode) throws {
+func keystroke(code: CGKeyCode, duration: UInt32 = 100_000) throws {
     let source = CGEventSource(stateID: .hidSystemState)
 
     let keyDown = CGEvent(keyboardEventSource: source, virtualKey: code, keyDown: true)
@@ -35,15 +35,15 @@ func keystroke(code: CGKeyCode) throws {
     }
 
     keyDown.post(tap: .cghidEventTap)
-    usleep(100_000) // 100ms
+    usleep(duration)
     keyUp.post(tap: .cghidEventTap)
 }
 
 func clickMain() {
     let arguments = CommandLine.arguments
 
-    guard arguments.count == 4 else {
-        print("Usage: ./sim click x y")
+    guard arguments.count > 3 else {
+        print("Usage: ./sim click x y [duration]")
         exit(1)
     }
 
@@ -52,8 +52,17 @@ func clickMain() {
         exit(1)
     }
 
+    var duration: UInt32 = 100_000
+    if arguments.count > 4 {
+        guard let dur = UInt32(arguments[4]) else {
+            print("Error: duration must be an integer")
+            exit(1)
+        }
+        duration = dur
+    }
+
     do {
-        try click(at: CGPoint(x: xCoord, y: yCoord))
+        try click(at: CGPoint(x: xCoord, y: yCoord), duration: duration)
     } catch {
         print("Error: \(error)")
         exit(1)
@@ -63,8 +72,8 @@ func clickMain() {
 func keystrokeMain() {
     let arguments = CommandLine.arguments
 
-    guard arguments.count == 3 else {
-        print("Usage: ./sim keystroke keycode")
+    guard arguments.count > 2 else {
+        print("Usage: ./sim keystroke keycode [duration]")
         exit(1)
     }
 
@@ -73,8 +82,17 @@ func keystrokeMain() {
         exit(1)
     }
 
+    var duration: UInt32 = 100_000
+    if arguments.count > 3 {
+        guard let dur = UInt32(arguments[3]) else {
+            print("Error: duration must be an integer")
+            exit(1)
+        }
+        duration = dur
+    }
+
     do {
-        try keystroke(code: keycode)
+        try keystroke(code: keycode, duration: duration)
     } catch {
         print("Error: \(error)")
         exit(1)

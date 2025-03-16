@@ -246,6 +246,7 @@ class ObjectManager:
         self.list_indices[list_index] = item_index
 
 # TODO factor into a module maybe
+# Before initializing this class: have the emulator started, the game loaded, and have clicked "make game"
 class AutomationManager(ABC):
     # source: /Library/Developer/CommandLineTools/SDKs/MacOSX14.5.sdk/System/Library/Frameworks/
     # Carbon.framework/Versions/A/Frameworks/HIToolbox.framework/Versions/A/Headers/Events.h
@@ -272,20 +273,64 @@ class AutomationManager(ABC):
         pass
 
     @abstractmethod
-    def click(self, x, y):
+    def _click(self, x, y, duration = 100_000):
         pass
 
     @abstractmethod
-    def keystroke(self, key):
+    def _keystroke(self, key, duration = 100_000):
         pass
 
-    @abstractmethod
+    def erase(self, x, y):
+        self._keystroke(self.keys.L)
+        self._click(x, y)
+        self._keystroke(self.keys.L)
+
     def select_object(self, object_name):
-        pass
+        try:
+            obj = self.object_manager.get_object(object_name)
+        except ValueError as e:
+            print(f"Error: {e}", file=sys.stderr)
+            return
 
-    @abstractmethod
+        self._keystroke(self.keys.D_UP)
+        self._keystroke(self.keys.Y_BTN)
+        time.sleep(0.5)
+
+        current_list = self.object_manager.current_list
+        delta = obj.list_index - current_list
+        key = self.keys.R if delta > 0 else self.keys.L
+        for i in range(abs(delta)):
+            self._keystroke(key)
+
+        current_item = self.object_manager.list_indices[obj.list_index]
+        delta = obj.index - current_item
+        key = self.keys.D_RIGHT if delta > 0 else self.keys.D_LEFT
+        for i in range(abs(delta)):
+            self._keystroke(key)
+
+        self._keystroke(self.keys.A_BTN)
+        time.sleep(0.2)
+
+        self.object_manager.update_selection(obj.list_index, obj.index)
+
     def place_object(self, object_name, x, y):
-        pass
+        self.select_object(object_name)
+
+        # TODO flesh out grid management
+        self.erase(x, y)
+        self._click(x, y)
+
+    def shorten_track(self):
+        self._click(770, 550) # open track scrubber
+        time.sleep(0.5)
+        self._click(370, 550) # select end of track
+        time.sleep(0.2)
+        self._click(500, 500) # close scrubber
+        time.sleep(0.2)
+        self._click(550, 520, 3_000_000) # make track shorter
+        # for i in range(20):
+        #     self._click(550, 520)
+        #     time.sleep(0.1)
 
 class MacOSAutomationManager(AutomationManager):
     def _script(self, code):
@@ -305,51 +350,11 @@ class MacOSAutomationManager(AutomationManager):
         )
         time.sleep(0.1)
 
-    def click(self, x, y):
-        subprocess.run(["./sim", "click", str(x + self.win_x), str(y + self.win_y)])
+    def _click(self, x, y, duration = 100_000):
+        subprocess.run(["./sim", "click", str(x + self.win_x), str(y + self.win_y), str(duration)])
 
-    def keystroke(self, key):
-        subprocess.run(["./sim", "keystroke", str(key)])
-
-    def erase(self, x, y):
-        self.keystroke(self.keys.L)
-        self.click(x, y)
-        self.keystroke(self.keys.L)
-
-    def select_object(self, object_name):
-        try:
-            obj = self.object_manager.get_object(object_name)
-        except ValueError as e:
-            print(f"Error: {e}", file=sys.stderr)
-            return
-
-        self.keystroke(self.keys.D_UP)
-        self.keystroke(self.keys.Y_BTN)
-        time.sleep(0.5)
-
-        current_list = self.object_manager.current_list
-        delta = obj.list_index - current_list
-        key = self.keys.R if delta > 0 else self.keys.L
-        for i in range(abs(delta)):
-            self.keystroke(key)
-
-        current_item = self.object_manager.list_indices[obj.list_index]
-        delta = obj.index - current_item
-        key = self.keys.D_RIGHT if delta > 0 else self.keys.D_LEFT
-        for i in range(abs(delta)):
-            self.keystroke(key)
-
-        self.keystroke(self.keys.A_BTN)
-        time.sleep(0.2)
-
-        self.object_manager.update_selection(obj.list_index, obj.index)
-
-    def place_object(self, object_name, x, y):
-        self.select_object(object_name)
-
-        # TODO flesh out grid management
-        self.erase(x, y)
-        self.click(x, y)
+    def _keystroke(self, key, duration = 100_000):
+        subprocess.run(["./sim", "keystroke", str(key), str(duration)])
 
 def get_automation_manager(x, y, width, height, style, dvorak=False):
     if sys.platform == "darwin":
@@ -367,9 +372,10 @@ def main():
 
     am = get_automation_manager(100, 100, 915, 600, "Super Mario Bros", dvorak=args.dvorak)
 
-    am.place_object("Koopa Troopa", 550, 250) # random square on grid
-    time.sleep(2)
-    am.place_object("Bowser Jr.", 550, 250)
+    # am.place_object("Koopa Troopa", 550, 250) # random square on grid
+    # time.sleep(2)
+    # am.place_object("Bowser Jr.", 550, 250)
+    am.shorten_track()
 
 if __name__ == "__main__":
     main()
