@@ -1,0 +1,22 @@
+[
+    {
+        "name": "Block",
+        "x": 9,
+        "y": 13
+    },
+    {
+        "name": "Block",
+        "x": 10,
+        "y": 13
+    },
+    {
+        "name": "Koopa Troopa",
+        "x": 10,
+        "y": 12
+    },
+    {
+        "name": "Pink Coin",
+        "x": 13,
+        "y": 9
+    }
+]
