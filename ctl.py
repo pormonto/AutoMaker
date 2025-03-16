@@ -98,7 +98,7 @@ class ObjectManager:
                 "Enemies": [
                     ["Goomba", "Koopa Troopa", "Buzzy Beetle", "Spike Top", "Spiny", "Blooper", "Cheep Cheep"],
                     ["Pirahna Plant", "Muncher", "Thwomp", "Monty Mole", "Rocky Wrench", "Hammer Bro", "Chain Comp"],
-                    ["Wiggler", "Boo", "Lava Bubble", "Bob-omp", "Dry Bones", "Fish Bone", "Magikoopa"],
+                    ["Wiggler", "Boo", "Lava Bubble", "Bob-omb", "Dry Bones", "Fish Bone", "Magikoopa"],
                     ["Bowser", "Bowser Jr.", "Boom Boom", "Angry Sun", "Lakitu", "Koopa Clown Car"]
                 ],
                 "Gizmos": [
@@ -120,7 +120,7 @@ class ObjectManager:
                 "Enemies": [
                     ["Goomba", "Koopa Troopa", "Buzzy Beetle", "Spike Top", "Spiny", "Blooper", "Cheep Cheep"],
                     ["Pirahna Plant", "Muncher", "Thwomp", "Monty Mole", "Rocky Wrench", "Hammer Bro", "Chain Comp"],
-                    ["Wiggler", "Boo", "Lava Bubble", "Bob-omp", "Dry Bones", "Fish Bone", "Magikoopa"],
+                    ["Wiggler", "Boo", "Lava Bubble", "Bob-omb", "Dry Bones", "Fish Bone", "Magikoopa"],
                     ["Bowser", "Bowser Jr.", "Boom Boom", "Angry Sun", "Lakitu", "Koopa Clown Car"]
                 ],
                 "Gizmos": [
@@ -142,7 +142,7 @@ class ObjectManager:
                 "Enemies": [
                     ["Galoomba", "Koopa Troopa", "Buzzy Beetle", "Spike Top", "Spiny", "Blooper", "Cheep Cheep"],
                     ["Jumping Pirahna Plant", "Muncher", "Thwomp", "Monty Mole", "Rocky Wrench", "Hammer Bro", "Chain Comp"],
-                    ["Wiggler", "Boo", "Lava Bubble", "Bob-omp", "Dry Bones", "Fish Bone", "Magikoopa"],
+                    ["Wiggler", "Boo", "Lava Bubble", "Bob-omb", "Dry Bones", "Fish Bone", "Magikoopa"],
                     ["Bowser", "Bowser Jr.", "Boom Boom", "Angry Sun", "Lakitu", "Koopa Clown Car"]
                 ],
                 "Gizmos": [
@@ -164,7 +164,7 @@ class ObjectManager:
                 "Enemies": [
                     ["Goomba", "Koopa Troopa", "Buzzy Beetle", "Spike Top", "Spiny", "Blooper", "Cheep Cheep"],
                     ["Pirahna Plant", "Muncher", "Thwomp", "Monty Mole", "Rocky Wrench", "Hammer Bro", "Chain Comp"],
-                    ["Wiggler", "Boo", "Lava Bubble", "Bob-omp", "Dry Bones", "Fish Bone", "Magikoopa"],
+                    ["Wiggler", "Boo", "Lava Bubble", "Bob-omb", "Dry Bones", "Fish Bone", "Magikoopa"],
                     ["Bowser", "Bowser Jr.", "Boom Boom", "Angry Sun", "Lakitu", "Junior Clown Car"]
                 ],
                 "Gizmos": [
@@ -186,7 +186,7 @@ class ObjectManager:
                 "Enemies": [
                     ["Goomba", "Koopa Troopa", "Ant Trooper", "Spiny", "Spiny", "Blooper", "Cheep Cheep"],
                     ["Skipsqueak", "Stingby", "Piranha Plant", "Pirahna Creeper", "Thwomp", "Hammer Bro", "Hop-Chops"],
-                    ["Boo", "Lava Bubble", "Bob-omp", "Dry Bones", "Fish Bone", "Magikoopa"],
+                    ["Boo", "Lava Bubble", "Bob-omb", "Dry Bones", "Fish Bone", "Magikoopa"],
                     ["Meowser", "Boom Boom", "Charvaargh", "Bully", "Porcupuffer", "Koopa Troopa Car"]
                 ],
                 "Gizmos": [
