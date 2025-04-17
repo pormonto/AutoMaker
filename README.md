@@ -1,4 +1,4 @@
-# Level Designer
+# AutoMaker
 
 Building a model that can build playable levels by using user-generated content to build machine-generated content. 
 
