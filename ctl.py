@@ -272,6 +272,7 @@ class AutomationManager(ABC):
         if object_name == self.last_inserted_object:
             return
 
+        # object_name = " ".join([x.lower().capitalize() for x in object_name])
         try:
             obj = self.object_manager.get_object(object_name)
         except ValueError as e:
@@ -325,7 +326,7 @@ class AutomationManager(ABC):
         self._keystroke(Keys.A_BTN)
         time.sleep(0.3)
         self._click(500, 500)
-        self._click(550, 520, 4_000) # make track shorter
+        self._click(550, 500, 4_000) # make track shorter
         self._click(500, 500) # restore focus
 
         # for i in range(20):
@@ -373,6 +374,7 @@ def main():
 
     for unit in data:
         am.place_object(unit['name'], GridPoint(unit['x'], unit['y']))
+        print(unit['name'], unit['x'], unit['y'])
 
 if __name__ == "__main__":
     main()
